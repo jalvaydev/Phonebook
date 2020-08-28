@@ -14,9 +14,7 @@ const App = () => {
     contactService
       .getAll()
       .then(response => {
-        if(JSON.stringify(response.data) === JSON.stringify(persons)){
-          console.log("interesting")
-        } else {
+        if(JSON.stringify(response.data) !== JSON.stringify(persons)){
           setPersons(response.data)
         }
       })
@@ -37,12 +35,15 @@ const App = () => {
 
 
   const removePerson = (id) => {
+    const person = persons.find(person => person.id === id)
+    if (window.confirm(`Delete ${person.name}?`) === true){
      contactService
       .remove(id)
       .then(contactService
             .getAll()
             .then(response => 
               setPersons(response.data)))
+    }
   }
 
   const addPerson = (event) => {
@@ -54,8 +55,8 @@ const App = () => {
     }
 
     const checkExists = () => {
-      let arr = persons.filter(person => person.name === newName)
-      return arr.length === 0
+      let check = persons.filter(person => 0 === person.name.toLowerCase().indexOf(newName.toLowerCase()))
+      return(check.length === 0)
     }
 
     if (checkExists()){
@@ -65,7 +66,17 @@ const App = () => {
           setPersons(persons.concat(response.data))
         })
     } else {
-      alert(`${newName} is already in the directory!`)
+      if(window.confirm(`${newName} is already in the directory, would you like to replace the old number with a new one?`) === true){
+        let person = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+        person.number = newNumber
+
+        contactService
+          .update(person.id, person)
+          .then(response => {
+            setPersons(persons.map(p => p.id !== person.id ? p : response.data))
+          }
+        )
+      }
     }
   }
 
