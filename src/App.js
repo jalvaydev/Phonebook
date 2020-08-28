@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import Search from './Search'
-import Form from './Form'
-import Directory from './Directory'
-import axios from 'axios'
-
+import Search from './components/Search'
+import Form from './components/Form'
+import Directory from './components/Directory'
+import contactService from './services/contacts'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
@@ -12,12 +11,16 @@ const App = () => {
   const [ newSearch, setNewSearch] = useState('')
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
+    contactService
+      .getAll()
       .then(response => {
-        setPersons(response.data)
+        if(JSON.stringify(response.data) === JSON.stringify(persons)){
+          console.log("interesting")
+        } else {
+          setPersons(response.data)
+        }
       })
-  }, [])
+  }, [persons])
 
 
   const handleNameInput = (event) => {
@@ -33,8 +36,22 @@ const App = () => {
   }
 
 
+  const removePerson = (id) => {
+     contactService
+      .remove(id)
+      .then(contactService
+            .getAll()
+            .then(response => 
+              setPersons(response.data)))
+  }
+
   const addPerson = (event) => {
     event.preventDefault()
+
+    const personToAdd = {
+      name: newName,
+      number: newNumber
+    }
 
     const checkExists = () => {
       let arr = persons.filter(person => person.name === newName)
@@ -42,7 +59,11 @@ const App = () => {
     }
 
     if (checkExists()){
-      setPersons(persons.concat({name: newName, number: newNumber}))
+      contactService
+        .create(personToAdd)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+        })
     } else {
       alert(`${newName} is already in the directory!`)
     }
@@ -56,7 +77,7 @@ const App = () => {
       <h2>Add A Number</h2>
       <Form addPerson={addPerson} newName={newName} newNumber={newNumber} nameHandler={handleNameInput} numberHandler={handleNumberInput}/>
       <h2>Phone Directory</h2>
-      <Directory persons={persons} newSearch={newSearch}/>
+      <Directory persons={persons} newSearch={newSearch} removePerson={removePerson}/>
     </div>
   )
 }

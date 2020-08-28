@@ -1,15 +1,6 @@
 import React from 'react'
 
-const Contact = ({person}) => {
-    return(  
-      <tr>
-        <td>{person.name}</td>
-        <td>{person.number}</td>
-      </tr>
-    )
-  }
-
-const Directory = ({persons, newSearch}) => {
+const Directory = ({persons, newSearch, removePerson}) => {
 
     const toDisplay = () => {
       if (newSearch.length === 0){
@@ -29,7 +20,11 @@ const Directory = ({persons, newSearch}) => {
         <tbody>
           {toDisplay()
             .map(person=> 
-              <Contact person={person} key={person.name}/>)}
+              <tr key={person.name}>
+                <td>{person.name}</td>
+                <td>{person.number}</td>
+                <td><button onClick={() => removePerson(person.id)}>Remove</button></td>
+              </tr>)}
         </tbody>
       </table>
     )
