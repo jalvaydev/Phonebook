@@ -39,7 +39,7 @@ const App = () => {
       .getAll()
       .then(response => {
         if(JSON.stringify(response.data) !== JSON.stringify(persons)){
-          setPersons(response.data)
+                    setPersons(response.data)
         }
       })
   }, [persons])
